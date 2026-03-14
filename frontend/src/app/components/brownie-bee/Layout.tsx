@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router';
-import { Home, ShoppingCart, Package, Box, FileText, ShoppingBag, Menu, X, CircleHelp, ChevronLeft, ChevronRight, Sparkles, ArrowLeft, ArrowRight, MousePointer2 } from 'lucide-react';
+import { Home, ShoppingCart, Package, Box, FileText, ShoppingBag, Menu, X, CircleHelp, ChevronLeft, ChevronRight, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from './Button';
-import { Modal } from './Modal';
 
 export function Layout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [isFocusTour, setIsFocusTour] = useState(false);
   const [guideStep, setGuideStep] = useState(0);
   const [highlightRect, setHighlightRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState(800);
+  const highlightFrameRef = useRef<number | null>(null);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -27,6 +28,17 @@ export function Layout() {
     }
     return () => { document.body.style.overflow = ''; };
   }, [sidebarOpen]);
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsMobile(window.innerWidth < 768);
+      setViewportHeight(window.innerHeight);
+    };
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
 
   const navigation = [
     { name: 'Visão do Dia', path: '/', icon: Home },
@@ -96,7 +108,7 @@ export function Layout() {
   };
 
   useEffect(() => {
-    if (!isGuideOpen && !isFocusTour) {
+    if (!isFocusTour) {
       setHighlightRect(null);
       return;
     }
@@ -113,7 +125,7 @@ export function Layout() {
         return;
       }
 
-      target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      target.scrollIntoView({ block: isMobile ? 'nearest' : 'center', inline: 'nearest', behavior: 'auto' });
       const rect = target.getBoundingClientRect();
       setHighlightRect({
         top: rect.top,
@@ -123,23 +135,34 @@ export function Layout() {
       });
     };
 
-    const timer = window.setTimeout(updateHighlight, 180);
+    const scheduleHighlight = () => {
+      if (highlightFrameRef.current) {
+        window.cancelAnimationFrame(highlightFrameRef.current);
+      }
+
+      highlightFrameRef.current = window.requestAnimationFrame(() => {
+        highlightFrameRef.current = window.requestAnimationFrame(updateHighlight);
+      });
+    };
+
+    scheduleHighlight();
     window.addEventListener('resize', updateHighlight);
     window.addEventListener('scroll', updateHighlight, true);
 
     return () => {
-      window.clearTimeout(timer);
+      if (highlightFrameRef.current) {
+        window.cancelAnimationFrame(highlightFrameRef.current);
+      }
       window.removeEventListener('resize', updateHighlight);
       window.removeEventListener('scroll', updateHighlight, true);
     };
-  }, [isGuideOpen, isFocusTour, guideStep, currentGuide.path, currentGuide.targetSelector, location.pathname, navigate]);
+  }, [isFocusTour, guideStep, currentGuide.path, currentGuide.targetSelector, location.pathname, navigate, isMobile]);
 
   const goToCurrentGuide = () => {
     navigate(currentGuide.path);
   };
 
   const closeGuideAll = () => {
-    setIsGuideOpen(false);
     setIsFocusTour(false);
   };
 
@@ -275,15 +298,19 @@ export function Layout() {
       </div>
 
       <button
-        onClick={() => setIsGuideOpen(true)}
-        className="fixed bottom-5 right-5 md:bottom-7 md:right-7 z-40 rounded-full p-3 md:p-3.5 border border-[var(--brand-primary)]/25 bg-[var(--brand-surface)]/55 backdrop-blur-sm text-[var(--brand-primary)] hover:bg-[var(--brand-surface)]/80 transition-all shadow-sm"
+        onClick={() => setIsFocusTour(true)}
+        className="fixed bottom-4 right-4 md:bottom-7 md:right-7 z-40 rounded-full p-3 md:p-3.5 border border-[var(--brand-primary)]/25 bg-[var(--brand-surface)]/55 backdrop-blur-sm text-[var(--brand-primary)] hover:bg-[var(--brand-surface)]/80 transition-all shadow-sm"
+        style={{
+          bottom: isMobile ? 'max(12px, env(safe-area-inset-bottom))' : undefined,
+          right: isMobile ? 'max(12px, env(safe-area-inset-right))' : undefined,
+        }}
         aria-label="Abrir Guia Tour"
         title="Guia Tour"
       >
         <CircleHelp className="w-5 h-5 md:w-6 md:h-6" />
       </button>
 
-      {(isGuideOpen || isFocusTour) && highlightRect && (
+      {isFocusTour && highlightRect && (
         <div className="fixed inset-0 pointer-events-none z-[55]">
           <div
             className="absolute rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.08)]"
@@ -294,17 +321,6 @@ export function Layout() {
               height: `${highlightRect.height + 12}px`,
             }}
           />
-
-          <div
-            className="absolute flex items-center gap-2 text-[var(--brand-primary)] bg-[var(--brand-surface)]/90 px-2 py-1 rounded-lg border border-[var(--brand-primary)]/30"
-            style={{
-              top: `${Math.max(12, highlightRect.top - 36)}px`,
-              left: `${highlightRect.left}px`,
-            }}
-          >
-            <MousePointer2 className="w-3.5 h-3.5" />
-            <span className="text-xs font-medium">Elemento destacado do tour</span>
-          </div>
 
           <div
             className="absolute text-[var(--brand-primary)]"
@@ -340,7 +356,30 @@ export function Layout() {
             }}
           />
 
-          <div className="fixed z-[57] right-4 bottom-4 md:right-7 md:bottom-7 w-[min(92vw,420px)] bg-[var(--brand-surface)] rounded-2xl border border-[var(--brand-primary)]/25 shadow-2xl p-4">
+          <div
+            className={[
+              'fixed z-[57] bg-[var(--brand-surface)] rounded-2xl border border-[var(--brand-primary)]/25 shadow-2xl p-4',
+              isMobile ? 'left-3 right-3 w-auto' : 'right-4 md:right-7 w-[min(92vw,420px)]',
+            ].join(' ')}
+            style={
+              isMobile
+                ? {
+                    top:
+                      highlightRect.top > viewportHeight * 0.5
+                        ? 'max(12px, env(safe-area-inset-top))'
+                        : 'auto',
+                    bottom:
+                      highlightRect.top > viewportHeight * 0.5
+                        ? 'auto'
+                        : 'max(12px, env(safe-area-inset-bottom))',
+                    maxHeight: '52vh',
+                    overflowY: 'auto',
+                  }
+                : {
+                    bottom: '28px',
+                  }
+            }
+          >
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-semibold text-[var(--brand-text-primary)]">Modo Foco • Tour guiado</p>
               <button onClick={closeGuideAll} className="text-[var(--brand-text-secondary)] hover:text-[var(--brand-text-primary)]">
@@ -373,96 +412,6 @@ export function Layout() {
           </div>
         </>
       )}
-
-      <Modal
-        isOpen={isGuideOpen}
-        onClose={closeGuideAll}
-        title="Guia Tour • Manual do sistema"
-        footer={
-          <>
-            <Button
-              variant="ghost"
-              onClick={() => setGuideStep(prev => Math.max(prev - 1, 0))}
-              disabled={guideStep === 0}
-            >
-              <ChevronLeft className="w-4 h-4 mr-1" />
-              Anterior
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                goToCurrentGuide();
-                setIsGuideOpen(false);
-              }}
-            >
-              Ir para esta tela
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setIsGuideOpen(false);
-                setIsFocusTour(true);
-              }}
-            >
-              Modo foco
-            </Button>
-            <Button
-              variant="primary"
-              onClick={() => setGuideStep(prev => Math.min(prev + 1, guideTour.length - 1))}
-              disabled={guideStep === guideTour.length - 1}
-            >
-              Próximo
-              <ChevronRight className="w-4 h-4 ml-1" />
-            </Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <div className="flex items-center justify-between text-sm text-[var(--brand-text-secondary)]">
-            <span>Etapa {guideStep + 1} de {guideTour.length}</span>
-            <span className="inline-flex items-center gap-1 text-[var(--brand-primary)] font-medium">
-              <Sparkles className="w-4 h-4" />
-              Guia interativo
-            </span>
-          </div>
-
-          <div className="bg-[var(--brand-bg)] rounded-[var(--radius-card)] p-4">
-            <h3 className="text-lg font-semibold text-[var(--brand-text-primary)] mb-2">{currentGuide.title}</h3>
-            <p className="text-sm text-[var(--brand-text-secondary)] leading-relaxed mb-3">{currentGuide.description}</p>
-            <p className="text-xs text-[var(--brand-primary)] mb-3">↳ O item correspondente está destacado na interface com setas.</p>
-            <div className="bg-[var(--brand-surface)] rounded-xl border border-[var(--brand-text-secondary)]/10 p-3 mb-3">
-              <p className="text-xs font-medium text-[var(--brand-text-primary)] mb-1">Botão em foco</p>
-              <p className="text-xs text-[var(--brand-text-secondary)]">{currentGuide.buttonLabel} — este é o comando principal desta tela para começar a ação mais importante do módulo.</p>
-            </div>
-            <p className="text-sm font-medium text-[var(--brand-text-primary)] mb-2">Como usar:</p>
-            <ul className="space-y-1.5 text-sm text-[var(--brand-text-secondary)]">
-              {currentGuide.actions.map((action, index) => (
-                <li key={index}>• {action}</li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <p className="text-xs text-[var(--brand-text-secondary)] mb-2">Atalhos do tour:</p>
-            <div className="flex flex-wrap gap-2">
-              {guideTour.map((item, index) => (
-                <button
-                  key={item.path}
-                  onClick={() => setGuideStep(index)}
-                  className={[
-                    'px-3 py-1.5 rounded-full text-xs border transition-colors',
-                    guideStep === index
-                      ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
-                      : 'bg-[var(--brand-surface)] text-[var(--brand-text-secondary)] border-[var(--brand-text-secondary)]/20 hover:text-[var(--brand-text-primary)]',
-                  ].join(' ')}
-                >
-                  {item.title}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }
