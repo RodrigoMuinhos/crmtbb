@@ -41,7 +41,8 @@ Depois suba frontend e API juntos pela raiz:
 - `npm run dev`: sobe frontend e API juntos
 - `npm run dev:web`: sobe apenas o frontend
 - `npm run dev:api`: sobe apenas a API
-- `npm run build`: gera o build do frontend
+- `npm run build`: build da API para ambiente de deploy (Railway)
+- `npm run build:web`: gera o build do frontend
 - `npm run start`: inicia apenas a API
 
 ## Docker (build + deploy local)
