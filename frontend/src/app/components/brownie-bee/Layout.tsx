@@ -9,6 +9,7 @@ export function Layout() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
+  const [isFocusTour, setIsFocusTour] = useState(false);
   const [guideStep, setGuideStep] = useState(0);
   const [highlightRect, setHighlightRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
 
@@ -89,7 +90,7 @@ export function Layout() {
   };
 
   useEffect(() => {
-    if (!isGuideOpen) {
+    if (!isGuideOpen && !isFocusTour) {
       setHighlightRect(null);
       return;
     }
@@ -125,7 +126,16 @@ export function Layout() {
       window.removeEventListener('resize', updateHighlight);
       window.removeEventListener('scroll', updateHighlight, true);
     };
-  }, [isGuideOpen, guideStep, currentGuide.path, currentGuide.targetSelector, location.pathname, navigate]);
+  }, [isGuideOpen, isFocusTour, guideStep, currentGuide.path, currentGuide.targetSelector, location.pathname, navigate]);
+
+  const goToCurrentGuide = () => {
+    navigate(currentGuide.path);
+  };
+
+  const closeGuideAll = () => {
+    setIsGuideOpen(false);
+    setIsFocusTour(false);
+  };
 
 
   const today = new Date().toLocaleDateString('pt-BR', {
@@ -267,7 +277,7 @@ export function Layout() {
         <CircleHelp className="w-5 h-5 md:w-6 md:h-6" />
       </button>
 
-      {isGuideOpen && highlightRect && (
+      {(isGuideOpen || isFocusTour) && highlightRect && (
         <div className="fixed inset-0 pointer-events-none z-[55]">
           <div
             className="absolute rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.15)] animate-pulse"
@@ -311,9 +321,54 @@ export function Layout() {
         </div>
       )}
 
+      {isFocusTour && highlightRect && (
+        <>
+          <div className="fixed inset-0 z-[54] bg-black/45 backdrop-blur-[1px]" />
+          <div
+            className="fixed z-[56] rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] pointer-events-none animate-pulse"
+            style={{
+              top: `${highlightRect.top - 6}px`,
+              left: `${highlightRect.left - 6}px`,
+              width: `${highlightRect.width + 12}px`,
+              height: `${highlightRect.height + 12}px`,
+            }}
+          />
+
+          <div className="fixed z-[57] right-4 bottom-4 md:right-7 md:bottom-7 w-[min(92vw,420px)] bg-[var(--brand-surface)] rounded-2xl border border-[var(--brand-primary)]/25 shadow-2xl p-4">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-semibold text-[var(--brand-text-primary)]">Modo Foco • Tour guiado</p>
+              <button onClick={closeGuideAll} className="text-[var(--brand-text-secondary)] hover:text-[var(--brand-text-primary)]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs text-[var(--brand-text-secondary)] mb-2">Etapa {guideStep + 1} de {guideTour.length}</p>
+            <h3 className="text-base font-semibold text-[var(--brand-text-primary)] mb-1">{currentGuide.title}</h3>
+            <p className="text-sm text-[var(--brand-text-secondary)] mb-3">{currentGuide.description}</p>
+
+            <div className="bg-[var(--brand-bg)] rounded-xl p-3 mb-3">
+              <p className="text-xs font-medium text-[var(--brand-text-primary)] mb-1">O que fazer aqui agora</p>
+              <p className="text-xs text-[var(--brand-text-secondary)]">Siga os passos do bloco e use o botão “Ir para esta tela” para praticar no fluxo real.</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2 justify-end">
+              <Button variant="ghost" size="sm" onClick={() => setGuideStep(prev => Math.max(prev - 1, 0))} disabled={guideStep === 0}>
+                <ChevronLeft className="w-4 h-4 mr-1" />
+                Anterior
+              </Button>
+              <Button variant="secondary" size="sm" onClick={goToCurrentGuide}>Ir para esta tela</Button>
+              <Button variant="primary" size="sm" onClick={() => setGuideStep(prev => Math.min(prev + 1, guideTour.length - 1))} disabled={guideStep === guideTour.length - 1}>
+                Próximo
+                <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+
       <Modal
         isOpen={isGuideOpen}
-        onClose={() => setIsGuideOpen(false)}
+        onClose={closeGuideAll}
         title="Guia Tour • Manual do sistema"
         footer={
           <>
@@ -328,11 +383,20 @@ export function Layout() {
             <Button
               variant="secondary"
               onClick={() => {
-                navigate(currentGuide.path);
+                goToCurrentGuide();
                 setIsGuideOpen(false);
               }}
             >
               Ir para esta tela
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setIsGuideOpen(false);
+                setIsFocusTour(true);
+              }}
+            >
+              Modo foco
             </Button>
             <Button
               variant="primary"
