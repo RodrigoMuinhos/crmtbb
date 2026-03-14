@@ -59,6 +59,25 @@ URLs após subir:
 - API: `http://localhost:3001`
 - Swagger: `http://localhost:18080/api/docs` (via proxy do frontend) ou `http://localhost:3001/api/docs`
 
+## Deploy no Railway (API)
+
+Este repositório é monorepo (`frontend/` e `api/`). O Railway está configurado via `nixpacks.toml` para publicar **somente a API**.
+
+Comportamento configurado:
+
+- instala dependências de `api/`
+- não executa `vite build`
+- inicia com `npm run start --prefix api`
+
+Variáveis obrigatórias no Railway:
+
+- `JDBC_DATABASE_URL` (ou `DATABASE_URL`)
+- `PORT` (opcional, Railway injeta automaticamente)
+
+Endpoint de saúde após deploy:
+
+- `/api/health`
+
 ## Variáveis de ambiente
 
 - `frontend/.env`: configuração do endereço base da API para o Vite

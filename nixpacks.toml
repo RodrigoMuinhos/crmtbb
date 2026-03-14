@@ -1,0 +1,14 @@
+[variables]
+NODE_ENV = "production"
+
+[phases.setup]
+nixPkgs = ["nodejs_20"]
+
+[phases.install]
+cmds = ["npm install --prefix api --omit=dev"]
+
+[phases.build]
+cmds = ["echo 'No build step required for API service'", "npm --prefix api run validate:routes || true"]
+
+[start]
+cmd = "npm run start --prefix api"
