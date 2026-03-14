@@ -137,7 +137,7 @@ export default function Gastos() {
             Acompanhe para onde o dinheiro vai
           </p>
         </div>
-        <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+        <Button variant="primary" onClick={() => setIsModalOpen(true)} data-tour="gastos-primary-action">
           <Plus className="w-4 h-4 mr-1" />
           Novo Gasto
         </Button>

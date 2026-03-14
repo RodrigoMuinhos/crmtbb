@@ -218,7 +218,7 @@ export default function Estoque() {
                   Ingredientes crus comprados no mercado (chocolate, farinha, açúcar, etc)
                 </p>
               </div>
-              <Button variant="primary" onClick={() => openAddModal('geral')}>
+              <Button variant="primary" onClick={() => openAddModal('geral')} data-tour="estoque-primary-action">
                 <Plus className="w-4 h-4 mr-1" />
                 Adicionar Item
               </Button>

@@ -146,7 +146,7 @@ export default function Compras() {
           </p>
         </div>
         {!isAdding && (
-          <Button variant="primary" onClick={() => setIsAdding(true)}>
+          <Button variant="primary" onClick={() => setIsAdding(true)} data-tour="compras-primary-action">
             <Plus className="w-4 h-4 mr-1" />
             Nova Compra
           </Button>

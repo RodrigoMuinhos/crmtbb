@@ -144,6 +144,7 @@ export default function Dashboard() {
                     variant="primary"
                     size="lg"
                     onClick={() => navigate('/produtos')}
+                    data-tour="dashboard-empty-products"
                     className="w-full"
                   >
                     <Package className="w-5 h-5 mr-2" />
@@ -255,6 +256,7 @@ export default function Dashboard() {
             variant="primary" 
             size="sm"
             onClick={() => setIsExpenseModalOpen(true)}
+            data-tour="dashboard-primary-action"
           >
             <Plus className="w-4 h-4 mr-1" />
             Registrar Gasto

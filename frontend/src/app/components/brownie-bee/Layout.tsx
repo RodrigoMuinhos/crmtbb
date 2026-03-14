@@ -41,42 +41,48 @@ export function Layout() {
     {
       title: 'Boas-vindas ao sistema',
       path: '/',
-      targetSelector: '[data-tour="nav-home"]',
+      targetSelector: '[data-tour="dashboard-primary-action"], [data-tour="dashboard-empty-products"]',
+      buttonLabel: 'Botão principal da tela inicial',
       description: 'Esta é a tela principal para acompanhar o dia da loja. Aqui você vê o resumo rápido do que está acontecendo.',
       actions: ['Confira faturamento, gastos e resultado do dia', 'Use os botões de atalho para cadastrar rápido', 'Volte aqui ao longo do dia para monitorar a operação'],
     },
     {
       title: 'Produtos',
       path: '/produtos',
-      targetSelector: '[data-tour="nav-produtos"]',
+      targetSelector: '[data-tour="produtos-primary-action"]',
+      buttonLabel: 'Botão “Novo Produto”',
       description: 'Cadastre, edite e organize os produtos que serão vendidos.',
       actions: ['Adicione nome, preço, categoria e imagem', 'Edite qualquer produto quando necessário', 'Desative ou exclua produtos que saíram de linha'],
     },
     {
       title: 'Compras',
       path: '/compras',
-      targetSelector: '[data-tour="nav-compras"]',
+      targetSelector: '[data-tour="compras-primary-action"]',
+      buttonLabel: 'Botão “Nova Compra”',
       description: 'Registre compras de insumos e matérias-primas para manter o histórico financeiro e de estoque atualizado.',
       actions: ['Cadastre a compra com data, mercado e itens', 'Edite compras para corrigir lançamentos', 'Exclua compras indevidas ou duplicadas'],
     },
     {
       title: 'Gastos',
       path: '/gastos',
-      targetSelector: '[data-tour="nav-gastos"]',
+      targetSelector: '[data-tour="gastos-primary-action"]',
+      buttonLabel: 'Botão “Novo Gasto”',
       description: 'Controle os gastos da operação para entender melhor os custos da loja.',
       actions: ['Registre gastos por categoria', 'Edite valores e observações quando precisar', 'Exclua lançamentos incorretos'],
     },
     {
       title: 'Estoque',
       path: '/estoque',
-      targetSelector: '[data-tour="nav-estoque"]',
+      targetSelector: '[data-tour="estoque-primary-action"]',
+      buttonLabel: 'Botão “Adicionar Item”',
       description: 'Gerencie ingredientes e produtos prontos nas áreas de produção, armazenado e vitrine.',
       actions: ['Ajuste quantidades quando houver perda ou reposição', 'Envie itens para vitrine com solicitações de transferência', 'Exclua itens antigos ou cadastrados por engano'],
     },
     {
       title: 'Relatórios',
       path: '/relatorios',
-      targetSelector: '[data-tour="nav-relatorios"]',
+      targetSelector: '[data-tour="relatorios-primary-action"]',
+      buttonLabel: 'Botão “Exportar PDF”',
       description: 'Acompanhe desempenho e resultados para tomar decisões com mais confiança.',
       actions: ['Analise evolução de vendas e gastos', 'Observe tendências do negócio', 'Use os dados para planejar próximos passos'],
     },
@@ -280,7 +286,7 @@ export function Layout() {
       {(isGuideOpen || isFocusTour) && highlightRect && (
         <div className="fixed inset-0 pointer-events-none z-[55]">
           <div
-            className="absolute rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.15)] animate-pulse"
+            className="absolute rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.08)]"
             style={{
               top: `${highlightRect.top - 6}px`,
               left: `${highlightRect.left - 6}px`,
@@ -323,9 +329,9 @@ export function Layout() {
 
       {isFocusTour && highlightRect && (
         <>
-          <div className="fixed inset-0 z-[54] bg-black/45 backdrop-blur-[1px]" />
+          <div className="fixed inset-0 z-[54] bg-black/20 backdrop-blur-[0.5px]" />
           <div
-            className="fixed z-[56] rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.55)] pointer-events-none animate-pulse"
+            className="fixed z-[56] rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.18)] pointer-events-none"
             style={{
               top: `${highlightRect.top - 6}px`,
               left: `${highlightRect.left - 6}px`,
@@ -347,8 +353,10 @@ export function Layout() {
             <p className="text-sm text-[var(--brand-text-secondary)] mb-3">{currentGuide.description}</p>
 
             <div className="bg-[var(--brand-bg)] rounded-xl p-3 mb-3">
+              <p className="text-xs font-medium text-[var(--brand-text-primary)] mb-1">Botão em foco</p>
+              <p className="text-xs text-[var(--brand-text-secondary)] mb-2">{currentGuide.buttonLabel}</p>
               <p className="text-xs font-medium text-[var(--brand-text-primary)] mb-1">O que fazer aqui agora</p>
-              <p className="text-xs text-[var(--brand-text-secondary)]">Siga os passos do bloco e use o botão “Ir para esta tela” para praticar no fluxo real.</p>
+              <p className="text-xs text-[var(--brand-text-secondary)]">Esse botão é o atalho principal desta tela. Use-o para iniciar a ação mais importante do módulo e depois siga os passos do guia para praticar no fluxo real.</p>
             </div>
 
             <div className="flex flex-wrap gap-2 justify-end">
@@ -422,6 +430,10 @@ export function Layout() {
             <h3 className="text-lg font-semibold text-[var(--brand-text-primary)] mb-2">{currentGuide.title}</h3>
             <p className="text-sm text-[var(--brand-text-secondary)] leading-relaxed mb-3">{currentGuide.description}</p>
             <p className="text-xs text-[var(--brand-primary)] mb-3">↳ O item correspondente está destacado na interface com setas.</p>
+            <div className="bg-[var(--brand-surface)] rounded-xl border border-[var(--brand-text-secondary)]/10 p-3 mb-3">
+              <p className="text-xs font-medium text-[var(--brand-text-primary)] mb-1">Botão em foco</p>
+              <p className="text-xs text-[var(--brand-text-secondary)]">{currentGuide.buttonLabel} — este é o comando principal desta tela para começar a ação mais importante do módulo.</p>
+            </div>
             <p className="text-sm font-medium text-[var(--brand-text-primary)] mb-2">Como usar:</p>
             <ul className="space-y-1.5 text-sm text-[var(--brand-text-secondary)]">
               {currentGuide.actions.map((action, index) => (

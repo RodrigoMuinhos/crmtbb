@@ -278,6 +278,7 @@ export default function Relatorios() {
           </p>
         </div>
         <button
+          data-tour="relatorios-primary-action"
           className="flex items-center gap-2 px-4 py-2 text-sm text-[var(--brand-primary)] hover:bg-[var(--brand-bg)] rounded-[var(--radius-button)] transition-colors"
           onClick={() => window.print()}
         >

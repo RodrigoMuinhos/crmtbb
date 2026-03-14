@@ -139,7 +139,7 @@ export default function Produtos() {
             Gerencie os produtos da sua vitrine
           </p>
         </div>
-        <Button variant="primary" onClick={handleOpenAdd}>
+        <Button variant="primary" onClick={handleOpenAdd} data-tour="produtos-primary-action">
           <Plus className="w-4 h-4 mr-1" />
           Novo Produto
         </Button>
