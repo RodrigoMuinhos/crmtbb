@@ -125,7 +125,7 @@ export default function Dashboard() {
                 </h2>
 
                 <p className="text-[var(--brand-text-secondary)] mb-4 leading-relaxed">
-                  Que bom ter vocês por aqui 💛 Vamos começar juntas: cadastrem os primeiros dados da loja e acompanhem tudo de forma simples e organizada.
+                  Que bom ter vocês por aqui 🐝 Vamos começar juntos: cadastrem os primeiros dados da loja e acompanhem tudo de forma simples e organizada.
                 </p>
 
                 <div className="bg-[var(--brand-bg)] rounded-[var(--radius-card)] p-4 text-left mb-6">
