@@ -478,6 +478,69 @@ app.post('/api/expenses', async (req, res, next) => {
   }
 });
 
+app.patch('/api/expenses/:id', async (req, res, next) => {
+  try {
+    const payload = req.body;
+    const fieldMap = {
+      date: 'expense_date',
+      value: 'value',
+      category: 'category',
+      observation: 'observation',
+      paymentMethod: 'payment_method',
+    };
+
+    const updates = [];
+    const values = [];
+
+    for (const [key, column] of Object.entries(fieldMap)) {
+      if (key in payload) {
+        const rawValue = payload[key];
+        const normalized = key === 'value' ? parseNumber(rawValue) : rawValue;
+        values.push(normalized === '' ? null : normalized);
+        updates.push(`${column} = $${values.length}`);
+      }
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ message: 'Nenhum campo para atualizar.' });
+    }
+
+    values.push(req.params.id);
+    const { rows } = await query(`
+      UPDATE expenses
+      SET ${updates.join(', ')}
+      WHERE id = $${values.length}
+      RETURNING
+        id,
+        expense_date::text AS date,
+        value::float AS value,
+        category,
+        observation,
+        payment_method AS "paymentMethod"
+    `, values);
+
+    if (!rows[0]) {
+      return res.status(404).json({ message: 'Gasto não encontrado.' });
+    }
+
+    res.json(toExpense(rows[0]));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete('/api/expenses/:id', async (req, res, next) => {
+  try {
+    const result = await query('DELETE FROM expenses WHERE id = $1', [req.params.id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Gasto não encontrado.' });
+    }
+    res.status(204).end();
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.get('/api/purchases', async (_req, res, next) => {
   try {
     res.json(await listPurchases());
@@ -545,6 +608,24 @@ app.post('/api/purchases', async (req, res, next) => {
 
     res.status(201).json(purchase);
   } catch (error) {
+    next(error);
+  }
+});
+
+app.delete('/api/purchases/:id', async (req, res, next) => {
+  try {
+    await withTransaction(async (client) => {
+      await client.query('DELETE FROM purchase_items WHERE purchase_id = $1', [req.params.id]);
+      const result = await client.query('DELETE FROM purchases WHERE id = $1', [req.params.id]);
+      if (result.rowCount === 0) {
+        throw Object.assign(new Error('Compra não encontrada.'), { statusCode: 404 });
+      }
+    });
+    res.status(204).end();
+  } catch (error) {
+    if (error.statusCode === 404) {
+      return res.status(404).json({ message: error.message });
+    }
     next(error);
   }
 });
@@ -641,6 +722,18 @@ app.patch('/api/stock-items/:id', async (req, res, next) => {
     }
 
     res.json(toStockItem(rows[0]));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.delete('/api/stock-items/:id', async (req, res, next) => {
+  try {
+    const result = await query('DELETE FROM stock_items WHERE id = $1', [req.params.id]);
+    if (result.rowCount === 0) {
+      return res.status(404).json({ message: 'Item de estoque não encontrado.' });
+    }
+    res.status(204).end();
   } catch (error) {
     next(error);
   }
@@ -783,25 +876,6 @@ app.post('/api/transfer-requests/:id/reject', async (req, res, next) => {
 app.get('/api/orders', async (req, res, next) => {
   try {
     res.json(await listOrders(req.query));
-  } catch (error) {
-    next(error);
-  }
-});
-
-app.delete('/api/reset', async (_req, res, next) => {
-  try {
-    await withTransaction(async (client) => {
-      await client.query('DELETE FROM order_items');
-      await client.query('DELETE FROM orders');
-      await client.query("DELETE FROM transfer_requests WHERE status IN ('pending', 'accepted', 'rejected')");
-      await client.query('DELETE FROM stock_items');
-      await client.query('DELETE FROM purchase_items');
-      await client.query('DELETE FROM purchases');
-      await client.query('DELETE FROM expenses');
-      await client.query('DELETE FROM products');
-    });
-
-    res.json({ ok: true });
   } catch (error) {
     next(error);
   }

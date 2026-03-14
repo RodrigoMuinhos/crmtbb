@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet } from 'react-router';
-import { Home, ShoppingCart, Package, Box, FileText, ShoppingBag, RotateCcw, Menu, X } from 'lucide-react';
-import { useApp } from '@/app/context/AppContext';
+import { Home, ShoppingCart, Package, Box, FileText, ShoppingBag, Menu, X } from 'lucide-react';
 
 export function Layout() {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const { clearAllData } = useApp();
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -37,11 +35,6 @@ export function Layout() {
     return location.pathname.startsWith(path);
   };
 
-  const handleReset = () => {
-    if (confirm('Deseja limpar todos os dados do sistema? Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita.')) {
-      clearAllData();
-    }
-  };
 
   const today = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long',
@@ -123,17 +116,6 @@ export function Layout() {
             );
           })}
         </nav>
-
-        {/* Bottom action */}
-        <div className="px-3 py-4 border-t border-[var(--brand-text-secondary)]/10">
-          <button
-            onClick={handleReset}
-            className="flex items-center gap-3 w-full px-4 py-3 rounded-[var(--radius-button)] text-sm text-[var(--brand-text-secondary)] hover:bg-[var(--brand-bg)] hover:text-[var(--status-critical)] active:bg-[var(--brand-bg)] transition-colors"
-          >
-            <RotateCcw className="w-4 h-4 flex-shrink-0" />
-            Limpar dados
-          </button>
-        </div>
       </aside>
 
       {/* ===== MAIN AREA ===== */}

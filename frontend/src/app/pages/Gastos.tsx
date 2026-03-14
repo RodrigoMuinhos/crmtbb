@@ -11,12 +11,20 @@ import {
   ExpenseItem,
   Badge
 } from '@/app/components/brownie-bee';
-import { Plus, ShoppingCart, Package, DollarSign, Calendar } from 'lucide-react';
+import { Plus, ShoppingCart, Package, DollarSign, Calendar, Pencil, Trash2 } from 'lucide-react';
 
 export default function Gastos() {
-  const { expenses, addExpense } = useApp();
+  const { expenses, addExpense, updateExpense, deleteExpense } = useApp();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [expenseForm, setExpenseForm] = useState({
+    value: '',
+    category: 'mercado' as 'mercado' | 'insumos' | 'embalagens' | 'outros',
+    observation: '',
+    paymentMethod: ''
+  });
+  const [editForm, setEditForm] = useState({
     value: '',
     category: 'mercado' as 'mercado' | 'insumos' | 'embalagens' | 'outros',
     observation: '',
@@ -62,6 +70,37 @@ export default function Gastos() {
       paymentMethod: ''
     });
     setIsModalOpen(false);
+  };
+
+  const handleOpenEdit = (id: string) => {
+    const expense = expenses.find(e => e.id === id);
+    if (!expense) return;
+    setEditingId(id);
+    setEditForm({
+      value: expense.value.toString(),
+      category: expense.category,
+      observation: expense.observation || '',
+      paymentMethod: expense.paymentMethod || ''
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingId || !editForm.value) return;
+    updateExpense(editingId, {
+      value: parseFloat(editForm.value),
+      category: editForm.category,
+      observation: editForm.observation || undefined,
+      paymentMethod: editForm.paymentMethod || undefined
+    });
+    setIsEditModalOpen(false);
+    setEditingId(null);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm('Excluir este gasto?')) {
+      deleteExpense(id);
+    }
   };
 
   const getCategoryIcon = (category: string) => {
@@ -192,13 +231,40 @@ export default function Gastos() {
           {todayExpenses.length > 0 ? (
             <div className="divide-y divide-[var(--brand-text-secondary)]/10">
               {todayExpenses.map((expense) => (
-                <ExpenseItem
-                  key={expense.id}
-                  icon={getCategoryIcon(expense.category)}
-                  category={getCategoryName(expense.category)}
-                  amount={`R$ ${expense.value.toFixed(2)}`}
-                  observation={expense.observation}
-                />
+                <div key={expense.id} className="flex items-start justify-between py-3 gap-2">
+                  <div className="flex items-start gap-3 flex-1">
+                    <div className="text-[var(--brand-text-secondary)] mt-0.5">
+                      {getCategoryIcon(expense.category)}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-[var(--brand-text-primary)] font-medium">
+                        {getCategoryName(expense.category)}
+                      </div>
+                      {expense.observation && (
+                        <div className="text-[var(--brand-text-secondary)] text-sm mt-0.5">
+                          {expense.observation}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[var(--brand-primary)] font-semibold">
+                      R$ {expense.value.toFixed(2)}
+                    </span>
+                    <button
+                      onClick={() => handleOpenEdit(expense.id)}
+                      className="p-1.5 rounded-lg text-[var(--brand-text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-bg)] transition-colors"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(expense.id)}
+                      className="p-1.5 rounded-lg text-[var(--brand-text-secondary)] hover:text-[var(--status-critical)] hover:bg-[var(--brand-bg)] transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
               ))}
             </div>
           ) : (
@@ -227,12 +293,40 @@ export default function Gastos() {
                       <Calendar className="w-3 h-3" />
                       {new Date(expense.date).toLocaleDateString('pt-BR')}
                     </div>
-                    <ExpenseItem
-                      icon={getCategoryIcon(expense.category)}
-                      category={getCategoryName(expense.category)}
-                      amount={`R$ ${expense.value.toFixed(2)}`}
-                      observation={expense.observation}
-                    />
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="text-[var(--brand-text-secondary)] mt-0.5">
+                          {getCategoryIcon(expense.category)}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-[var(--brand-text-primary)] font-medium">
+                            {getCategoryName(expense.category)}
+                          </div>
+                          {expense.observation && (
+                            <div className="text-[var(--brand-text-secondary)] text-sm mt-0.5">
+                              {expense.observation}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[var(--brand-primary)] font-semibold">
+                          R$ {expense.value.toFixed(2)}
+                        </span>
+                        <button
+                          onClick={() => handleOpenEdit(expense.id)}
+                          className="p-1.5 rounded-lg text-[var(--brand-text-secondary)] hover:text-[var(--brand-primary)] hover:bg-[var(--brand-bg)] transition-colors"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(expense.id)}
+                          className="p-1.5 rounded-lg text-[var(--brand-text-secondary)] hover:text-[var(--status-critical)] hover:bg-[var(--brand-bg)] transition-colors"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 ))}
             </div>
@@ -293,6 +387,60 @@ export default function Gastos() {
             placeholder="Ex: Débito, Crédito..."
             value={expenseForm.paymentMethod}
             onChange={(e) => setExpenseForm({ ...expenseForm, paymentMethod: e.target.value })}
+          />
+        </div>
+      </Modal>
+
+      {/* Edit Expense Modal */}
+      <Modal
+        isOpen={isEditModalOpen}
+        onClose={() => { setIsEditModalOpen(false); setEditingId(null); }}
+        title="Editar Gasto"
+        footer={
+          <>
+            <Button variant="ghost" onClick={() => { setIsEditModalOpen(false); setEditingId(null); }}>
+              Cancelar
+            </Button>
+            <Button variant="primary" onClick={handleSaveEdit}>
+              Salvar
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <Input
+            label="Valor *"
+            type="number"
+            placeholder="0,00"
+            value={editForm.value}
+            onChange={(e) => setEditForm({ ...editForm, value: e.target.value })}
+          />
+          <div>
+            <label className="block mb-2 text-[var(--brand-text-primary)]">
+              Categoria *
+            </label>
+            <select
+              className="w-full px-4 py-2 bg-[var(--brand-surface)] border border-[var(--brand-text-secondary)]/20 rounded-[var(--radius-button)] text-[var(--brand-text-primary)]"
+              value={editForm.category}
+              onChange={(e) => setEditForm({ ...editForm, category: e.target.value as any })}
+            >
+              <option value="mercado">Mercado</option>
+              <option value="insumos">Insumos</option>
+              <option value="embalagens">Embalagens</option>
+              <option value="outros">Outros</option>
+            </select>
+          </div>
+          <Input
+            label="Observação"
+            placeholder="Ex: Compra semanal..."
+            value={editForm.observation}
+            onChange={(e) => setEditForm({ ...editForm, observation: e.target.value })}
+          />
+          <Input
+            label="Forma de pagamento"
+            placeholder="Ex: Débito, Crédito..."
+            value={editForm.paymentMethod}
+            onChange={(e) => setEditForm({ ...editForm, paymentMethod: e.target.value })}
           />
         </div>
       </Modal>

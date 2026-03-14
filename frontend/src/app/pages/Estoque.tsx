@@ -11,7 +11,7 @@ import {
   StockItem,
   Badge
 } from '@/app/components/brownie-bee';
-import { Package, Plus, Pencil, MoveRight, Check, X } from 'lucide-react';
+import { Package, Plus, Pencil, MoveRight, Check, X, Trash2 } from 'lucide-react';
 
 type TabType = 'producao' | 'armazenado' | 'vitrine';
 
@@ -19,6 +19,7 @@ export default function Estoque() {
   const { 
     stock, 
     updateStockItem, 
+    deleteStockItem,
     addStockItem, 
     pendingTransfers,
     createTransferRequest,
@@ -151,6 +152,12 @@ export default function Estoque() {
     return labels[location];
   };
 
+  const handleDeleteItem = (id: string) => {
+    if (confirm('Excluir este item do estoque?')) {
+      deleteStockItem(id);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -237,6 +244,14 @@ export default function Estoque() {
                         <Pencil className="w-3 h-3 mr-1" />
                         Ajustar
                       </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteItem(item.id)}
+                      >
+                        <Trash2 className="w-3 h-3 mr-1 text-[var(--status-critical)]" />
+                        <span className="text-[var(--status-critical)]">Excluir</span>
+                      </Button>
                     </div>
                   </div>
                 ))}
@@ -306,6 +321,14 @@ export default function Estoque() {
                       >
                         <Pencil className="w-3 h-3 mr-1" />
                         Ajustar
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteItem(item.id)}
+                      >
+                        <Trash2 className="w-3 h-3 mr-1 text-[var(--status-critical)]" />
+                        <span className="text-[var(--status-critical)]">Excluir</span>
                       </Button>
                     </div>
                   </div>
@@ -409,6 +432,14 @@ export default function Estoque() {
                         >
                           <Pencil className="w-3 h-3 mr-1" />
                           Ajustar
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteItem(item.id)}
+                        >
+                          <Trash2 className="w-3 h-3 mr-1 text-[var(--status-critical)]" />
+                          <span className="text-[var(--status-critical)]">Excluir</span>
                         </Button>
                       </div>
                     </div>

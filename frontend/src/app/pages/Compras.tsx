@@ -8,11 +8,12 @@ import {
   Button,
   Input
 } from '@/app/components/brownie-bee';
-import { Plus, Trash2, ShoppingBag, Calendar } from 'lucide-react';
+import { Plus, Trash2, ShoppingBag, Calendar, Pencil } from 'lucide-react';
 
 export default function Compras() {
-  const { purchases, addPurchase } = useApp();
+  const { purchases, addPurchase, deletePurchase } = useApp();
   const [isAdding, setIsAdding] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [purchaseForm, setPurchaseForm] = useState({
     date: new Date().toISOString().split('T')[0],
     store: '',
@@ -81,12 +82,58 @@ export default function Compras() {
       store: '',
       items: [{ name: '', quantity: '', cost: '' }]
     });
+    setEditingId(null);
     setIsAdding(false);
   };
 
   const sortedPurchases = [...purchases].sort((a, b) => 
     new Date(b.date).getTime() - new Date(a.date).getTime()
   );
+
+  const handleDeletePurchase = (id: string) => {
+    if (confirm('Excluir esta compra?')) {
+      deletePurchase(id);
+    }
+  };
+
+  const handleOpenEdit = (id: string) => {
+    const purchase = purchases.find(p => p.id === id);
+    if (!purchase) return;
+    setEditingId(id);
+    setPurchaseForm({
+      date: purchase.date,
+      store: purchase.store,
+      items: purchase.items.map(i => ({
+        name: i.name,
+        quantity: i.quantity.toString(),
+        cost: i.cost !== undefined ? i.cost.toString() : ''
+      }))
+    });
+    setIsAdding(true);
+  };
+
+  const handleSubmitEdit = () => {
+    if (!editingId || !purchaseForm.store || purchaseForm.items.some(i => !i.name || !i.quantity)) return;
+    deletePurchase(editingId);
+    addPurchase({
+      date: purchaseForm.date,
+      store: purchaseForm.store,
+      totalValue: calculatedTotal,
+      items: purchaseForm.items.map(item => ({
+        id: Date.now().toString() + Math.random(),
+        name: item.name,
+        quantity: parseFloat(item.quantity),
+        cost: item.cost ? parseFloat(item.cost) : undefined
+      }))
+    });
+    setPurchaseForm({
+      date: new Date().toISOString().split('T')[0],
+      store: '',
+      items: [{ name: '', quantity: '', cost: '' }]
+    });
+    setEditingId(null);
+    setIsAdding(false);
+  };
 
   return (
     <div className="space-y-6">
@@ -110,7 +157,7 @@ export default function Compras() {
       {isAdding && (
         <Card>
           <CardHeader>
-            <CardTitle>Nova Compra</CardTitle>
+            <CardTitle>{editingId ? 'Editar Compra' : 'Nova Compra'}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -195,10 +242,10 @@ export default function Compras() {
 
               {/* Actions */}
               <div className="flex gap-2 justify-end pt-4 border-t border-[var(--brand-text-secondary)]/10">
-                <Button variant="ghost" onClick={() => setIsAdding(false)}>
+                <Button variant="ghost" onClick={() => { setIsAdding(false); setEditingId(null); }}>
                   Cancelar
                 </Button>
-                <Button variant="primary" onClick={handleSubmit}>
+                <Button variant="primary" onClick={editingId ? handleSubmitEdit : handleSubmit}>
                   Salvar Compra
                 </Button>
               </div>
@@ -261,6 +308,17 @@ export default function Compras() {
                       </div>
                     ))}
                   </div>
+                </div>
+
+                <div className="flex gap-2 mt-3 pt-3 border-t border-[var(--brand-text-secondary)]/10">
+                  <Button variant="ghost" size="sm" onClick={() => handleOpenEdit(purchase.id)}>
+                    <Pencil className="w-3.5 h-3.5 mr-1" />
+                    Editar
+                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeletePurchase(purchase.id)}>
+                    <Trash2 className="w-3.5 h-3.5 mr-1 text-[var(--status-critical)]" />
+                    <span className="text-[var(--status-critical)]">Excluir</span>
+                  </Button>
                 </div>
               </CardContent>
             </Card>

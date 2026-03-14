@@ -83,12 +83,16 @@ interface AppContextType {
   orders: Order[];
   pendingTransfers: PendingTransfer[];
   addExpense: (expense: Omit<Expense, 'id'>) => void;
+  updateExpense: (id: string, updates: Partial<Omit<Expense, 'id'>>) => void;
+  deleteExpense: (id: string) => void;
   addPurchase: (purchase: Omit<Purchase, 'id'>) => void;
+  deletePurchase: (id: string) => void;
   addProduct: (product: Omit<Product, 'id'>) => void;
   updateProduct: (id: string, product: Partial<Product>) => void;
   deleteProduct: (id: string) => void;
   addStockItem: (item: Omit<StockItem, 'id'>) => void;
   updateStockItem: (id: string, updates: Partial<StockItem>) => void;
+  deleteStockItem: (id: string) => void;
   transferStock: (itemId: string, quantity: number) => void;
   createTransferRequest: (transfer: Omit<PendingTransfer, 'id' | 'requestedAt'>) => void;
   acceptTransferRequest: (transferId: string) => void;
@@ -98,7 +102,6 @@ interface AppContextType {
   getTodayOrders: () => Order[];
   getProductSales: (productId: string, date?: string) => { quantity: number; revenue: number };
   generate90DaysData: () => void;
-  clearAllData: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -175,6 +178,31 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })();
   };
 
+  const updateExpense = (id: string, updates: Partial<Omit<Expense, 'id'>>) => {
+    void (async () => {
+      try {
+        const updated = await apiRequest<Expense>(`/expenses/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify(updates),
+        });
+        setExpenses(prev => prev.map(e => e.id === id ? updated : e));
+      } catch (error) {
+        console.error('Erro ao atualizar gasto:', error);
+      }
+    })();
+  };
+
+  const deleteExpense = (id: string) => {
+    void (async () => {
+      try {
+        await apiRequest<void>(`/expenses/${id}`, { method: 'DELETE' });
+        setExpenses(prev => prev.filter(e => e.id !== id));
+      } catch (error) {
+        console.error('Erro ao excluir gasto:', error);
+      }
+    })();
+  };
+
   const addPurchase = (purchase: Omit<Purchase, 'id'>) => {
     void (async () => {
       try {
@@ -185,6 +213,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         await loadRemoteData();
       } catch (error) {
         console.error('Erro ao criar compra:', error);
+      }
+    })();
+  };
+
+  const deletePurchase = (id: string) => {
+    void (async () => {
+      try {
+        await apiRequest<void>(`/purchases/${id}`, { method: 'DELETE' });
+        setPurchases(prev => prev.filter(p => p.id !== id));
+      } catch (error) {
+        console.error('Erro ao excluir compra:', error);
       }
     })();
   };
@@ -252,6 +291,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         setStock(prev => prev.map(item => item.id === id ? updated : item));
       } catch (error) {
         console.error('Erro ao atualizar item de estoque:', error);
+      }
+    })();
+  };
+
+  const deleteStockItem = (id: string) => {
+    void (async () => {
+      try {
+        await apiRequest<void>(`/stock-items/${id}`, { method: 'DELETE' });
+        setStock(prev => prev.filter(s => s.id !== id));
+      } catch (error) {
+        console.error('Erro ao excluir item de estoque:', error);
       }
     })();
   };
@@ -358,22 +408,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     // Feature removed - no longer generates mock data
   };
 
-  const clearAllData = () => {
-    void (async () => {
-      try {
-        await apiRequest<{ ok: boolean }>('/reset', { method: 'DELETE' });
-        setExpenses([]);
-        setPurchases([]);
-        setProducts([]);
-        setStock([]);
-        setOrders([]);
-        setPendingTransfers([]);
-      } catch (error) {
-        console.error('Erro ao limpar os dados:', error);
-      }
-    })();
-  };
-
   const value = {
     expenses,
     purchases,
@@ -382,12 +416,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     orders,
     pendingTransfers,
     addExpense,
+    updateExpense,
+    deleteExpense,
     addPurchase,
+    deletePurchase,
     addProduct,
     updateProduct,
     deleteProduct,
     addStockItem,
     updateStockItem,
+    deleteStockItem,
     transferStock,
     createTransferRequest,
     acceptTransferRequest,
@@ -396,8 +434,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getTodayExpenses,
     getTodayOrders,
     getProductSales,
-    generate90DaysData,
-    clearAllData
+    generate90DaysData
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
