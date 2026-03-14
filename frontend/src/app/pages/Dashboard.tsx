@@ -121,21 +121,21 @@ export default function Dashboard() {
                 </div>
 
                 <h2 className="text-2xl font-semibold text-[var(--brand-text-primary)] mb-3">
-                  Sistema zerado e pronto para uso
+                  Bem-vindas ao nosso sistema!
                 </h2>
 
                 <p className="text-[var(--brand-text-secondary)] mb-4 leading-relaxed">
-                  Os dados de demonstração foram removidos. Agora é só começar a cadastrar as informações reais da loja.
+                  Que bom ter vocês por aqui 💛 Vamos começar juntas: cadastrem os primeiros dados da loja e acompanhem tudo de forma simples e organizada.
                 </p>
 
                 <div className="bg-[var(--brand-bg)] rounded-[var(--radius-card)] p-4 text-left mb-6">
                   <p className="text-sm font-medium text-[var(--brand-text-primary)] mb-2">
-                    Próximos passos:
+                    Para começar agora:
                   </p>
                   <ul className="space-y-2 text-sm text-[var(--brand-text-secondary)]">
-                    <li>• Cadastre seus primeiros produtos</li>
-                    <li>• Registre compras e gastos reais</li>
-                    <li>• Acompanhe o resultado do dia no painel</li>
+                    <li>• Cadastrem os primeiros produtos</li>
+                    <li>• Registrem compras e gastos do dia a dia</li>
+                    <li>• Acompanhem o resultado da loja no painel</li>
                   </ul>
                 </div>
 
@@ -147,7 +147,7 @@ export default function Dashboard() {
                     className="w-full"
                   >
                     <Package className="w-5 h-5 mr-2" />
-                    Cadastrar produtos
+                    Cadastrar primeiros produtos
                   </Button>
                   <Button
                     variant="secondary"
@@ -156,7 +156,7 @@ export default function Dashboard() {
                     className="w-full"
                   >
                     <ShoppingCart className="w-5 h-5 mr-2" />
-                    Registrar compra
+                    Registrar primeira compra
                   </Button>
                   <Button
                     variant="ghost"
@@ -165,7 +165,7 @@ export default function Dashboard() {
                     className="w-full"
                   >
                     <Plus className="w-5 h-5 mr-2" />
-                    Registrar primeiro gasto
+                    Registrar primeiro gasto da loja
                   </Button>
                 </div>
               </div>
