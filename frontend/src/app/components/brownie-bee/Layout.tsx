@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router';
-import { Home, ShoppingCart, Package, Box, FileText, ShoppingBag, Menu, X, CircleHelp, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import { Home, ShoppingCart, Package, Box, FileText, ShoppingBag, Menu, X, CircleHelp, ChevronLeft, ChevronRight, Sparkles, ArrowLeft, ArrowRight, MousePointer2 } from 'lucide-react';
 import { Button } from './Button';
 import { Modal } from './Modal';
 
@@ -10,6 +10,7 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isGuideOpen, setIsGuideOpen] = useState(false);
   const [guideStep, setGuideStep] = useState(0);
+  const [highlightRect, setHighlightRect] = useState<{ top: number; left: number; width: number; height: number } | null>(null);
 
   // Close sidebar on route change (mobile)
   useEffect(() => {
@@ -39,36 +40,42 @@ export function Layout() {
     {
       title: 'Boas-vindas ao sistema',
       path: '/',
+      targetSelector: '[data-tour="nav-home"]',
       description: 'Esta é a tela principal para acompanhar o dia da loja. Aqui você vê o resumo rápido do que está acontecendo.',
       actions: ['Confira faturamento, gastos e resultado do dia', 'Use os botões de atalho para cadastrar rápido', 'Volte aqui ao longo do dia para monitorar a operação'],
     },
     {
       title: 'Produtos',
       path: '/produtos',
+      targetSelector: '[data-tour="nav-produtos"]',
       description: 'Cadastre, edite e organize os produtos que serão vendidos.',
       actions: ['Adicione nome, preço, categoria e imagem', 'Edite qualquer produto quando necessário', 'Desative ou exclua produtos que saíram de linha'],
     },
     {
       title: 'Compras',
       path: '/compras',
+      targetSelector: '[data-tour="nav-compras"]',
       description: 'Registre compras de insumos e matérias-primas para manter o histórico financeiro e de estoque atualizado.',
       actions: ['Cadastre a compra com data, mercado e itens', 'Edite compras para corrigir lançamentos', 'Exclua compras indevidas ou duplicadas'],
     },
     {
       title: 'Gastos',
       path: '/gastos',
+      targetSelector: '[data-tour="nav-gastos"]',
       description: 'Controle os gastos da operação para entender melhor os custos da loja.',
       actions: ['Registre gastos por categoria', 'Edite valores e observações quando precisar', 'Exclua lançamentos incorretos'],
     },
     {
       title: 'Estoque',
       path: '/estoque',
+      targetSelector: '[data-tour="nav-estoque"]',
       description: 'Gerencie ingredientes e produtos prontos nas áreas de produção, armazenado e vitrine.',
       actions: ['Ajuste quantidades quando houver perda ou reposição', 'Envie itens para vitrine com solicitações de transferência', 'Exclua itens antigos ou cadastrados por engano'],
     },
     {
       title: 'Relatórios',
       path: '/relatorios',
+      targetSelector: '[data-tour="nav-relatorios"]',
       description: 'Acompanhe desempenho e resultados para tomar decisões com mais confiança.',
       actions: ['Analise evolução de vendas e gastos', 'Observe tendências do negócio', 'Use os dados para planejar próximos passos'],
     },
@@ -80,6 +87,45 @@ export function Layout() {
     if (path === '/') return location.pathname === '/';
     return location.pathname.startsWith(path);
   };
+
+  useEffect(() => {
+    if (!isGuideOpen) {
+      setHighlightRect(null);
+      return;
+    }
+
+    if (location.pathname !== currentGuide.path) {
+      navigate(currentGuide.path);
+      return;
+    }
+
+    const updateHighlight = () => {
+      const target = document.querySelector(currentGuide.targetSelector) as HTMLElement | null;
+      if (!target) {
+        setHighlightRect(null);
+        return;
+      }
+
+      target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      const rect = target.getBoundingClientRect();
+      setHighlightRect({
+        top: rect.top,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      });
+    };
+
+    const timer = window.setTimeout(updateHighlight, 180);
+    window.addEventListener('resize', updateHighlight);
+    window.addEventListener('scroll', updateHighlight, true);
+
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('resize', updateHighlight);
+      window.removeEventListener('scroll', updateHighlight, true);
+    };
+  }, [isGuideOpen, guideStep, currentGuide.path, currentGuide.targetSelector, location.pathname, navigate]);
 
 
   const today = new Date().toLocaleDateString('pt-BR', {
@@ -148,6 +194,19 @@ export function Layout() {
               <Link
                 key={item.path}
                 to={item.path}
+                data-tour={
+                  item.path === '/'
+                    ? 'nav-home'
+                    : item.path === '/produtos'
+                    ? 'nav-produtos'
+                    : item.path === '/compras'
+                    ? 'nav-compras'
+                    : item.path === '/gastos'
+                    ? 'nav-gastos'
+                    : item.path === '/estoque'
+                    ? 'nav-estoque'
+                    : 'nav-relatorios'
+                }
                 className={[
                   'flex items-center gap-3 px-4 py-3 rounded-[var(--radius-button)]',
                   'text-sm font-medium transition-colors',
@@ -208,6 +267,50 @@ export function Layout() {
         <CircleHelp className="w-5 h-5 md:w-6 md:h-6" />
       </button>
 
+      {isGuideOpen && highlightRect && (
+        <div className="fixed inset-0 pointer-events-none z-[55]">
+          <div
+            className="absolute rounded-xl border-2 border-[var(--brand-primary)] shadow-[0_0_0_9999px_rgba(0,0,0,0.15)] animate-pulse"
+            style={{
+              top: `${highlightRect.top - 6}px`,
+              left: `${highlightRect.left - 6}px`,
+              width: `${highlightRect.width + 12}px`,
+              height: `${highlightRect.height + 12}px`,
+            }}
+          />
+
+          <div
+            className="absolute flex items-center gap-2 text-[var(--brand-primary)] bg-[var(--brand-surface)]/90 px-2 py-1 rounded-lg border border-[var(--brand-primary)]/30"
+            style={{
+              top: `${Math.max(12, highlightRect.top - 36)}px`,
+              left: `${highlightRect.left}px`,
+            }}
+          >
+            <MousePointer2 className="w-3.5 h-3.5" />
+            <span className="text-xs font-medium">Elemento destacado do tour</span>
+          </div>
+
+          <div
+            className="absolute text-[var(--brand-primary)]"
+            style={{
+              top: `${highlightRect.top + highlightRect.height / 2 - 12}px`,
+              left: `${Math.max(8, highlightRect.left - 30)}px`,
+            }}
+          >
+            <ArrowRight className="w-6 h-6" />
+          </div>
+          <div
+            className="absolute text-[var(--brand-primary)]"
+            style={{
+              top: `${highlightRect.top + highlightRect.height / 2 - 12}px`,
+              left: `${highlightRect.left + highlightRect.width + 8}px`,
+            }}
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </div>
+        </div>
+      )}
+
       <Modal
         isOpen={isGuideOpen}
         onClose={() => setIsGuideOpen(false)}
@@ -254,6 +357,7 @@ export function Layout() {
           <div className="bg-[var(--brand-bg)] rounded-[var(--radius-card)] p-4">
             <h3 className="text-lg font-semibold text-[var(--brand-text-primary)] mb-2">{currentGuide.title}</h3>
             <p className="text-sm text-[var(--brand-text-secondary)] leading-relaxed mb-3">{currentGuide.description}</p>
+            <p className="text-xs text-[var(--brand-primary)] mb-3">↳ O item correspondente está destacado na interface com setas.</p>
             <p className="text-sm font-medium text-[var(--brand-text-primary)] mb-2">Como usar:</p>
             <ul className="space-y-1.5 text-sm text-[var(--brand-text-secondary)]">
               {currentGuide.actions.map((action, index) => (
