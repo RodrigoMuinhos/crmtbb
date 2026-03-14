@@ -1,0 +1,23 @@
+{
+  "name": "browniebee-api",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch server/index.js",
+    "start": "node server/index.js",
+    "validate:routes": "node scripts/validate-swagger-routes.mjs",
+    "test:e2e": "node scripts/e2e-smoke.mjs",
+    "test:api": "npm run validate:routes && npm run test:e2e",
+    "test:db": "node scripts/test-db-persistence.mjs",
+    "seed:teste": "node scripts/seed-test-all-tables.mjs",
+    "cleanup:teste": "node scripts/cleanup-test-data.mjs"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "pg": "^8.20.0",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

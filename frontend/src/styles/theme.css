@@ -1,0 +1,211 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  
+  /* === THE BROWNIE BEE - DESIGN SYSTEM === */
+  
+  /* Brand / Base Colors */
+  --brand-bg: #F5F1EC;           /* Areia Claro - Fundo geral */
+  --brand-surface: #FFFFFF;      /* Branco Quente - Cards / Modais */
+  --brand-primary: #5A3A2E;      /* Marrom Brownie - Botões primários / valores */
+  --brand-secondary: #D2A679;    /* Caramelo - Destaques leves */
+  --brand-text-primary: #3A2A23; /* Marrom Escuro - Títulos */
+  --brand-text-secondary: #8C857D; /* Cinza Quente - Textos auxiliares */
+  
+  /* Estados / Status (sempre suaves) */
+  --status-info: #E9E4DD;        /* Informação neutra */
+  --status-success: #7E9C6A;     /* Resultado positivo */
+  --status-warning: #F3D9A4;     /* Atenção */
+  --status-alert: #E6B17E;       /* Fora do padrão */
+  --status-critical: #C96A5A;    /* Ação imediata */
+  
+  /* Spacing Tokens */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  
+  /* Border Radius */
+  --radius-card: 16px;
+  --radius-button: 14px;
+  --radius-modal: 20px;
+  
+  /* Typography */
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 15px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 22px;
+  --text-3xl: 24px;
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  
+  /* Shadow */
+  --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.08);
+  
+  /* Legacy/Fallback tokens for compatibility */
+  --background: var(--brand-bg);
+  --foreground: var(--brand-text-primary);
+  --card: var(--brand-surface);
+  --card-foreground: var(--brand-text-primary);
+  --popover: var(--brand-surface);
+  --popover-foreground: var(--brand-text-primary);
+  --primary: var(--brand-primary);
+  --primary-foreground: #ffffff;
+  --secondary: var(--brand-secondary);
+  --secondary-foreground: var(--brand-primary);
+  --muted: var(--status-info);
+  --muted-foreground: var(--brand-text-secondary);
+  --accent: var(--brand-secondary);
+  --accent-foreground: var(--brand-primary);
+  --destructive: var(--status-critical);
+  --destructive-foreground: #ffffff;
+  --border: rgba(58, 42, 35, 0.1);
+  --input: transparent;
+  --input-background: var(--brand-surface);
+  --switch-background: var(--status-info);
+  --ring: var(--brand-primary);
+  --radius: var(--radius-card);
+  
+  --sidebar: var(--brand-surface);
+  --sidebar-foreground: var(--brand-text-primary);
+  --sidebar-primary: var(--brand-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--brand-bg);
+  --sidebar-accent-foreground: var(--brand-text-primary);
+  --sidebar-border: rgba(58, 42, 35, 0.1);
+  --sidebar-ring: var(--brand-primary);
+}
+
+@theme inline {
+  /* Brand Colors */
+  --color-brand-bg: var(--brand-bg);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-text-primary: var(--brand-text-primary);
+  --color-brand-text-secondary: var(--brand-text-secondary);
+  
+  /* Status Colors */
+  --color-status-info: var(--status-info);
+  --color-status-success: var(--status-success);
+  --color-status-warning: var(--status-warning);
+  --color-status-alert: var(--status-alert);
+  --color-status-critical: var(--status-critical);
+  
+  /* Legacy compatibility */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-[var(--brand-bg)] text-[var(--brand-text-primary)];
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  /**
+  * Default typography styles for HTML elements (h1-h4, p, label, button, input).
+  * These are in @layer base, so Tailwind utility classes (like text-sm, text-lg) automatically override them.
+  */
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-semibold);
+    line-height: 1.3;
+    color: var(--brand-text-primary);
+  }
+
+  h2 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+    color: var(--brand-text-primary);
+  }
+
+  h3 {
+    font-size: var(--text-md);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+    color: var(--brand-text-primary);
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+    color: var(--brand-text-primary);
+  }
+
+  p {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.6;
+    color: var(--brand-text-primary);
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+}

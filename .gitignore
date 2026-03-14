@@ -1,0 +1,31 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+
+# Env files and secrets
+.env
+.env.*
+**/.env
+**/.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Deployment/platform
+.vercel
+.railway
+
+# Docker overrides
+docker-compose.override.yml
